@@ -7,7 +7,10 @@ from ollama._types import ListResponse
 from helper.utils import cache_tmp
 
 
-def get_all_models(filter_out:Optional[Sequence[str]]=None) -> Generator[ListResponse.Model,None,None]:
+def get_all_models(filter_out=None) -> Generator[ListResponse.Model,None,None]:
+    if filter_out is None:
+        filter_out = list()
+    filter_out.append('llama4:latest')
     for _ in ollama.list().models:
         if filter_out and any(kw in _.model for kw in filter_out):
             continue
@@ -19,7 +22,7 @@ def get_models_capability(model_obj):
     return ollama.chat(
         model_obj.model,
         [{'content': "What can you do? describe in only keywords", 'role': 'user'}],
-        options=ollama.Options(num_thread=15)
+        options=ollama.Options(num_thread=15, )
     )['message']['content']
 
 
@@ -36,7 +39,7 @@ def choose_best_model_from_prompt(prompt: str) -> str | None:
     ask_to_ollama += prompt
 
     output = ollama.chat(
-        'phi4',
+        'qwen3:4b',
         [ollama.Message(role='user', content=ask_to_ollama)],
         options=ollama.Options(num_thread=15)
     )

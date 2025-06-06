@@ -4,8 +4,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_community.tools.sql_database.tool import QuerySQLDatabaseTool
 from langgraph.graph import START, StateGraph
 
-
-db = SQLDatabase.from_uri("sqlite:///Chinook.db")
+db = SQLDatabase.from_uri("sqlite:///.Chinook.db")
 # print(db.dialect)
 # print(db.get_table_info())
 
@@ -18,9 +17,9 @@ class State(TypedDict):
     result: str
     answer: str
 
-# llm = ChatOllama(model="llama3.1:8b", temperature=0.1)
-llm = ChatOllama(model="qwen3:0.6b", temperature=0,verbose=True)
 
+# llm = ChatOllama(model="llama3.1:8b", temperature=0.1)
+llm = ChatOllama(model="qwen3:4b", temperature=0, verbose=True, num_ctx=9999, num_thread=15)
 
 system_message = """
 Given an input question, create a syntactically correct {dialect} query to
@@ -77,7 +76,6 @@ def write_query(state: State):
 # print(f"{llm_generated_query=}")
 
 
-
 def execute_query(state: State):
     """Execute SQL query."""
     execute_query_tool = QuerySQLDatabaseTool(db=db)
@@ -102,13 +100,11 @@ def generate_answer(state: State):
     return {"answer": response.content}
 
 
-
 graph_builder = StateGraph(State).add_sequence(
     [write_query, execute_query, generate_answer]
 )
 graph_builder.add_edge(START, "write_query")
 graph = graph_builder.compile()
-
 
 for step in graph.stream(
         {"question": "How many employees are there?"}, stream_mode="updates"
