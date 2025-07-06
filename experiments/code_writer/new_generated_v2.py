@@ -12,6 +12,7 @@ This implementation creates a self-autonomous agent capable of:
 """
 from langchain_core.agents import AgentAction, AgentFinish
 from pydantic import BaseModel, Field
+from config import settings
 import os
 import subprocess
 import tempfile
@@ -60,7 +61,7 @@ class WriteCodeFileInput(BaseModel):
 class AutonomousDeveloperAgent:
     def __init__(self, project_path: str = None):
         self.llm = ChatOllama(
-            model="codellama:13b",
+            model=settings.model,
             temperature=0,
         )
 
@@ -623,4 +624,8 @@ def main():
 
 
 if __name__ == "__main__":
+    print("Please run this script as a module using:")
+    print("python -m experiments.code_writer.new_generated_v2")
+    print("Or install the package in development mode first:")
+    print("pip install -e .")
     main()
